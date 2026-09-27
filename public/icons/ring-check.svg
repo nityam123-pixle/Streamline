@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+
+  <!-- BACKGROUND / RING -->
+  <circle
+    id="background"
+    cx="12"
+    cy="12"
+    r="8.25"
+    fill="#6A6A6A"
+  />
+
+  <!-- CHECK -->
+  <path
+    id="check"
+    d="M7.85 11.95L10.65 14.75L16.25 8.95"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="2.15"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+</svg>

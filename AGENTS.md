@@ -1,0 +1,66 @@
+# Streamline
+
+## Stack
+
+- **Language / Runtime**: TypeScript 5, Node.js 20+
+- **Framework**: Next.js 16 (App Router), React 19
+- **Key dependencies**: Tailwind CSS, Framer Motion, Radix UI, Lucide React
+- **Package manager**: npm
+
+## Build approach
+
+Tracer Bullet (prove the whole pipe works end to end with a thin working thread before widening features).
+
+## Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Dev server
+npm run dev
+
+# Production build
+npm run build
+
+# Lint
+npm run lint
+```
+
+## Specs
+
+Stored in `docs/specs/`. Format: `docs/specs/NNNN-title.md`.
+
+## Rules
+
+- Server Components by default. Add `"use client"` only for interactive pieces.
+- All mutations go through Server Actions or route handlers validating with Zod.
+- Derive identity on the server from the session, never from client input.
+- Every action and route handler authorizes first, then acts.
+- Scope all database queries on workspace data by `workspaceId`.
+- Never hand roll password hashing or sessions. Use Better Auth.
+- Import shared instances from `src/lib/auth/` and `src/lib/db/`.
+- Validate secrets in one env module, kept gitignored in `.env.local`.
+- Wire data into existing Figma UI without changing layouts or animations.
+- Run `npm run build` before considering any Server Action change verified (Vitest cannot catch Next.js "use server" export constraints).
+
+## Agent skills
+
+- [better-auth-best-practices](.agents/skills/better-auth-best-practices/): `better-auth/skills`, Better Auth authentication architecture and security
+- [vercel-react-best-practices](.agents/skills/vercel-react-best-practices/): `vercel-labs/agent-skills`, React and Next.js performance and patterns
+
+## Context files
+
+- [src/app/(onboarding)/AGENTS.md](src/app/(onboarding)/AGENTS.md): Onboarding transition shell, step routing, and visual rules
+
+_Drafted by /audit from the repo, worth a quick human pass. Edit freely: once a line stops matching this draft, later runs treat it as curated and will flag rather than overwrite it._
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

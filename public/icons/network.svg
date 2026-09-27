@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Left Connector -->
+  <path id="left-connector" d="M 12 4 V 10.4 C 12 11.0 11.2 11.2 9.5 11.2 H 7.8 C 6.2 11.2 5 12.2 5 14.0 V 19" fill="none" stroke="#6A6A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Right Connector -->
+  <path id="right-connector" d="M 12 4 V 10.4 C 12 11.0 12.8 11.2 14.5 11.2 H 16.2 C 17.8 11.2 19 12.2 19 14.0 V 19" fill="none" stroke="#6A6A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Nodes -->
+  <circle id="top-node" cx="12" cy="4" r="2.5" fill="#6A6A6A" />
+  <circle id="left-node" cx="5" cy="19" r="2.5" fill="#6A6A6A" />
+  <circle id="right-node" cx="19" cy="19" r="2.5" fill="#6A6A6A" />
+</svg>

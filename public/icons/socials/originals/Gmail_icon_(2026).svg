@@ -1,0 +1,26 @@
+<svg width="24" height="24" viewBox="0 0 800 636.36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Latest Official 2026 Gmail SVG -->
+  <path fill="url(#gmail-2026-a)" d="M 627.27 81.82 H 800 V 581.82 c 0 30.12 -24.42 54.55 -54.55 54.55 h -90.91 a 27.27 27.27 0 0 1 -27.27 -27.27 z" />
+  <path fill="#fc413d" d="M 172.73 81.82 H 0 V 581.82 c 0 30.12 24.42 54.55 54.55 54.55 h 90.91 a 27.27 27.27 0 0 0 27.27 -27.27 z" />
+  <path fill="url(#gmail-2026-b)" d="M 141.94 20.26 C 105.42 -10.44 50.95 -5.72 20.26 30.8 -10.44 67.31 -5.72 121.78 30.8 152.48 l 345.81 290.68 a 36.36 36.36 0 0 0 46.8 0 L 769.21 152.47 C 805.72 121.78 810.44 67.31 779.74 30.79 749.05 -5.72 694.58 -10.44 658.07 20.26 L 400 237.18 Z" />
+  <defs>
+    <linearGradient id="gmail-2026-a" x1="165" x2="165" y1="44" y2="166" gradientUnits="userSpaceOnUse" gradientTransform="matrix(4.5454426,0,0,4.5454426,-36.362684,-118.18025)">
+      <stop stop-color="#60d673" />
+      <stop offset=".17" stop-color="#42c868" />
+      <stop offset=".39" stop-color="#0ebc5f" />
+      <stop offset=".62" stop-color="#00a9bb" />
+      <stop offset=".86" stop-color="#3c90ff" />
+      <stop offset="1" stop-color="#3186ff" />
+    </linearGradient>
+    <linearGradient id="gmail-2026-b" x1="8" x2="184" y1="46.13" y2="46.13" gradientUnits="userSpaceOnUse" gradientTransform="matrix(4.5454426,0,0,4.5454426,-36.362684,-118.18025)">
+      <stop offset=".08" stop-color="#ff63a0" />
+      <stop offset=".3" stop-color="#fc413d" />
+      <stop offset=".5" stop-color="#fc413d" />
+      <stop offset=".65" stop-color="#fc413d" />
+      <stop offset=".72" stop-color="#fc5c30" />
+      <stop offset=".86" stop-color="#feb10c" />
+      <stop offset=".91" stop-color="#fec700" />
+      <stop offset=".96" stop-color="#ffdb0f" />
+    </linearGradient>
+  </defs>
+</svg>

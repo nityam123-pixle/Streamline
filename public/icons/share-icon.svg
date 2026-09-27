@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <path id="upper-connector" d="M6 12H12L18 6" stroke="#6A6A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path id="lower-connector" d="M6 12H12L18 18" stroke="#6A6A6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle id="left-node" cx="6" cy="12" r="3" fill="#6A6A6A"/>
+  <circle id="upper-right-node" cx="18" cy="6" r="3" fill="#6A6A6A"/>
+  <circle id="lower-right-node" cx="18" cy="18" r="3" fill="#6A6A6A"/>
+</svg>

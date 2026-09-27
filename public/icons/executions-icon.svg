@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Clean Executions Icon 24x24 - Rounded Bottom-Right & Rounded Arrow -->
+  <path fill="#5E5E5E" fill-rule="evenodd" d="M 5.5 2 H 18.5 A 3.5 3.5 0 0 1 22 5.5 V 13 A 9 9 0 0 1 13 22 H 5.5 A 3.5 3.5 0 0 1 2 18.5 V 5.5 A 3.5 3.5 0 0 1 5.5 2 Z M 6.4 11.35 
+C 6.0 11.72 6.0 12.28 6.4 12.65 
+L 10.7 16.65 
+C 11.2 17.1 11.95 16.75 11.95 16.1 
+V 13.3 
+H 16.7 
+C 17.3 13.3 17.8 12.75 17.8 12.1 
+V 11.9 
+C 17.8 11.25 17.3 10.7 16.7 10.7 
+H 11.95 
+V 7.9 
+C 11.95 7.25 11.2 6.9 10.7 7.35 
+Z" />
+</svg>

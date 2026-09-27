@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Streamline Brand Palette */
+    --background: 0 0% 100%;       /* #FFFFFF */
+    --foreground: 0 0% 15.7%;      /* #282828 */
+
+    --card: 0 0% 94.1%;            /* #F0F0F0 */
+    --card-foreground: 0 0% 15.7%; /* #282828 */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15.7%;
+
+    --primary: 0 0% 15.7%;         /* #282828 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 92.9%;       /* #EDEDED */
+    --secondary-foreground: 0 0% 15.7%;
+
+    --muted: 0 0% 96.9%;           /* #F7F7F7 */
+    --muted-foreground: 0 0% 45.9%; /* #757575 */
+
+    --accent: 0 0% 94.1%;          /* #F0F0F0 */
+    --accent-foreground: 0 0% 15.7%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 89.4%;          /* #E4E4E4 */
+    --input: 0 0% 88.6%;           /* #E2E8F0 */
+    --ring: 0 0% 15.7%;            /* #282828 */
+
+    --radius: 0.5rem;              /* 8px radius from Figma */
+  }
+
+  html,
+  body,
+  #__next,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    letter-spacing: -0.0015em; /* Exact -0.15% letter-spacing across all pages from Figma */
+  }
+  input,
+  select,
+  textarea,
+  button {
+    letter-spacing: -0.0015em; /* Ensure form controls strictly inherit -0.15% */
+  }
+}
