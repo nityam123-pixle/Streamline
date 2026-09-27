@@ -11,6 +11,7 @@ import {
   getLaunchSummaryAction,
   completeOnboardingAction,
 } from "@/actions/launch"
+import { MEMBER_AVATAR_THEMES } from "@/components/launch/MemberCard"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import * as nextHeaders from "next/headers"
@@ -227,6 +228,22 @@ describe("Setup Summary and Onboarding Completion (Feature 8)", () => {
       expect(formatInvitedTeammatesText(1)).toBe("Team: 1 member invited")
       expect(formatInvitedTeammatesText(3)).toBe("Team: 3 members invited")
     })
+
+    it("defines 6 Figma palette themes for member avatars with matching SA geometry tokens", () => {
+      expect(MEMBER_AVATAR_THEMES).toHaveLength(6)
+      // Blue theme (exact SA styling)
+      expect(MEMBER_AVATAR_THEMES[0].bg).toBe("#A9C7FF")
+      expect(MEMBER_AVATAR_THEMES[0].border).toBe("#82AEFF")
+      expect(MEMBER_AVATAR_THEMES[0].text).toBe("#2086FF")
+      // Green theme
+      expect(MEMBER_AVATAR_THEMES[1].bg).toBe("#89EBBA")
+      expect(MEMBER_AVATAR_THEMES[1].border).toBe("#58C16C")
+      expect(MEMBER_AVATAR_THEMES[1].text).toBe("#15803D")
+      // Purple theme
+      expect(MEMBER_AVATAR_THEMES[2].bg).toBe("#D7C2FE")
+      expect(MEMBER_AVATAR_THEMES[2].border).toBe("#AF76FF")
+      expect(MEMBER_AVATAR_THEMES[2].text).toBe("#7F6EFF")
+    })
   })
 
   describe("getLaunchSummaryAction", () => {
@@ -257,8 +274,36 @@ describe("Setup Summary and Onboarding Completion (Feature 8)", () => {
       expect(summary.invitedCount).toBe(2)
       expect(summary.invitedTeammatesText).toBe("Team: 2 members invited")
       expect(summary.inviteCode).toBe(`vance-${testRunId}`)
-      expect(summary.shareableInviteLink).toBe(`http://localhost:3000/invite/vance-${testRunId}`)
+      expect(summary.shareableInviteLink).toBe(`http://localhost:3000/join/vance-${testRunId}`)
       expect(summary.onboardingStep).toBe("launch")
+      expect(summary.membersCount).toBe(2)
+      expect(summary.members).toBeDefined()
+      expect(summary.members).toHaveLength(2)
+      expect(summary.members![0].role).toBe("owner")
+      expect(summary.members![0].name).toBe("Eleanor Vance")
+      expect(summary.members![0].email).toBe(ownerEmail)
+      expect(summary.members![1].role).toBe("editor")
+      expect(summary.members![1].name).toBe("Luke Sanderson")
+      expect(summary.members![1].email).toBe(editorEmail)
+    })
+
+    it("restricts shareableInviteLink and inviteCode to owner/admin, hiding from editor/viewer", async () => {
+      await db.session.updateMany({
+        where: { userId: editorUserId },
+        data: { activeOrganizationId: testOrgId },
+      })
+
+      const headers = new Headers()
+      headers.set("cookie", editorSessionCookie)
+      headers.set("host", "localhost:3000")
+      vi.mocked(nextHeaders.headers).mockResolvedValue(headers)
+
+      const res = await getLaunchSummaryAction()
+      expect(res.success).toBe(true)
+      expect(res.summary).toBeDefined()
+      expect(res.summary?.memberRole).toBe("editor")
+      expect(res.summary?.shareableInviteLink).toBeNull()
+      expect(res.summary?.inviteCode).toBeNull()
     })
 
     it("handles Organization.inviteCode being null gracefully without throwing", async () => {
@@ -305,7 +350,7 @@ describe("Setup Summary and Onboarding Completion (Feature 8)", () => {
       const res = await getLaunchSummaryAction()
       expect(res.success).toBe(true)
       expect(res.summary?.shareableInviteLink).toBe(
-        `https://app.streamline.io/invite/vance-${testRunId}`
+        `https://app.streamline.io/join/vance-${testRunId}`
       )
     })
   })

@@ -1,6 +1,15 @@
 'use client';
 
 import React, { useState } from "react";
+import { MemberCard } from "./MemberCard";
+
+export interface MemberSummaryItem {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  jobTitle?: string | null;
+}
 
 export interface SetupSummaryData {
   companyInitials?: string;
@@ -10,6 +19,8 @@ export interface SetupSummaryData {
   integrationsText?: string;
   workflowText?: string;
   invitedTeammatesText?: string;
+  membersCount?: number;
+  members?: MemberSummaryItem[];
   shareableInviteLink?: string | null;
 }
 
@@ -21,6 +32,8 @@ const DEFAULT_SUMMARY: SetupSummaryData = {
   integrationsText: "1 tool selected: HubSpot",
   workflowText: "First workflow: Lead Generation",
   invitedTeammatesText: "Team: No teammates invited yet",
+  membersCount: 0,
+  members: [],
   shareableInviteLink: null,
 };
 
@@ -164,19 +177,34 @@ export function SetupSummaryCard({
             </svg>
           </div>
           <span className="font-['Geist',sans-serif] text-[14px] font-medium leading-[20px] tracking-[-0.0015em] text-[#757575]">
-            {summary.invitedTeammatesText || "Team: No teammates invited yet"}
+            {summary.members && summary.members.length > 0
+              ? `Team: ${summary.members.length} ${summary.members.length === 1 ? "active member" : "active members"}${
+                  summary.invitedTeammatesText && !summary.invitedTeammatesText.includes("No teammates")
+                    ? ` · ${summary.invitedTeammatesText.replace(/^Team:\s*/i, "")}`
+                    : ""
+                }`
+              : summary.invitedTeammatesText || "Team: No teammates invited yet"}
           </span>
         </div>
 
+        {/* Joined members list with name and role matching exact SA badge style */}
+        {summary.members && summary.members.length > 0 && (
+          <div className="flex flex-col gap-[8px] my-[2px]">
+            {summary.members.map((m, idx) => (
+              <MemberCard key={m.id} member={m} index={idx} />
+            ))}
+          </div>
+        )}
+
         {summary.shareableInviteLink && (
-          <div className="flex items-center justify-between gap-[8px] ml-[28px] pl-[10px] pr-[6px] py-[5px] bg-[#E8E8E8] rounded-[6px] border border-[#DFDFDF]">
+          <div className="flex items-center justify-between gap-[8px] pl-[12px] pr-[6px] py-[6px] bg-[#E8E8E8] rounded-[6px] border border-[#DFDFDF]">
             <span className="font-['Geist',sans-serif] text-[12px] font-medium text-[#757575] truncate select-all">
               {summary.shareableInviteLink}
             </span>
             <button
               type="button"
               onClick={handleCopyLink}
-              className="font-['Geist',sans-serif] text-[12px] font-medium text-[#282828] hover:text-black px-[8px] py-[2px] bg-white hover:bg-[#FAFAFA] rounded border border-[#D5D5D5] transition-colors flex-shrink-0 cursor-pointer select-none active:scale-[0.98]"
+              className="font-['Geist',sans-serif] text-[12px] font-medium text-[#282828] hover:text-black px-[8px] py-[3px] bg-white hover:bg-[#FAFAFA] rounded border border-[#D5D5D5] transition-colors flex-shrink-0 cursor-pointer select-none active:scale-[0.98]"
               aria-label="Copy shareable invite link"
             >
               {copied ? "Copied" : "Copy link"}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { SetupSummaryCard, SetupSummaryData } from "./SetupSummaryCard";
+import { MemberCard } from "./MemberCard";
 import {
   getLaunchSummaryAction,
   completeOnboardingAction,
@@ -19,6 +20,7 @@ export function LaunchStepContent({
 }: LaunchStepContentProps) {
   const shouldReduceMotion = useReducedMotion();
   const [summaryData, setSummaryData] = useState<SetupSummaryData | null>(null);
+  const [memberRole, setMemberRole] = useState<string>("owner");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -32,6 +34,9 @@ export function LaunchStepContent({
         if (!isMounted) return;
 
         if (res.success && res.summary) {
+          if (res.summary.memberRole) {
+            setMemberRole(res.summary.memberRole);
+          }
           setSummaryData({
             companyInitials: res.summary.companyInitials,
             companyName: res.summary.companyName,
@@ -40,6 +45,8 @@ export function LaunchStepContent({
             integrationsText: res.summary.integrationsText,
             workflowText: res.summary.workflowText,
             invitedTeammatesText: res.summary.invitedTeammatesText,
+            membersCount: res.summary.membersCount,
+            members: res.summary.members,
             shareableInviteLink: res.summary.shareableInviteLink,
           });
         }
@@ -63,6 +70,16 @@ export function LaunchStepContent({
 
     setIsSubmitting(true);
     setErrorMessage(null);
+
+    // Non-owner teammates don't execute owner setup completion
+    if (memberRole !== "owner" && memberRole !== "admin") {
+      setIsCompleted(true);
+      setIsSubmitting(false);
+      if (onContinue) {
+        onContinue();
+      }
+      return;
+    }
 
     try {
       const res = await completeOnboardingAction();
@@ -137,10 +154,12 @@ export function LaunchStepContent({
 
           <div className="flex flex-col gap-[6px]">
             <h1 className="font-['Geist',sans-serif] text-[24px] font-semibold leading-[30px] tracking-[-0.0015em] text-[#282828] m-0">
-              Workspace Launched!
+              {memberRole !== "owner" ? "Welcome to the Team!" : "Workspace Launched!"}
             </h1>
             <p className="font-['Geist',sans-serif] text-[14px] font-medium leading-[20px] tracking-[-0.0015em] text-[#757575] m-0 max-w-[415px]">
-              Your Streamline workspace is ready. All configuration details have been saved to your account.
+              {memberRole !== "owner"
+                ? `You’ve joined ${summaryData?.companyName || "Streamline"} as a teammate. Your account is ready.`
+                : "Your Streamline workspace is ready. All configuration details have been saved to your account."}
             </p>
           </div>
         </motion.div>
@@ -156,9 +175,10 @@ export function LaunchStepContent({
           <div className="flex items-center gap-[8px]">
             <span className="w-[8px] h-[8px] rounded-full bg-[#38A169] flex-shrink-0 animate-pulse" />
             <span className="font-['Geist',sans-serif] text-[13px] font-semibold tracking-[-0.0015em] text-[#282828]">
-              Status: Onboarding completed
+              {memberRole !== "owner" ? "Status: Joined workspace" : "Status: Onboarding completed"}
             </span>
           </div>
+
 
           <div className="flex flex-col gap-[8px] pt-[8px] border-t border-[#E2E2E2]">
             <div className="flex justify-between items-center text-[13px] font-['Geist',sans-serif]">
@@ -188,10 +208,26 @@ export function LaunchStepContent({
             <div className="flex justify-between items-center text-[13px] font-['Geist',sans-serif]">
               <span className="text-[#757575] font-medium">Team</span>
               <span className="text-[#282828] font-medium truncate max-w-[240px]">
-                {summaryData?.invitedTeammatesText?.replace("Team: ", "") || "No teammates invited"}
+                {summaryData?.members && summaryData.members.length > 0
+                  ? `${summaryData.members.length} ${summaryData.members.length === 1 ? "active member" : "active members"}`
+                  : summaryData?.invitedTeammatesText?.replace("Team: ", "") || "No teammates invited"}
               </span>
             </div>
           </div>
+
+          {/* Member cards shown after Launch button is pressed */}
+          {summaryData?.members && summaryData.members.length > 0 && (
+            <div className="flex flex-col gap-[10px] pt-[12px] border-t border-[#E2E2E2]">
+              <span className="font-['Geist',sans-serif] text-[13px] font-semibold text-[#282828] text-left">
+                Team Members ({summaryData.members.length})
+              </span>
+              <div className="flex flex-col gap-[8px]">
+                {summaryData.members.map((m, idx) => (
+                  <MemberCard key={m.id} member={m} index={idx} />
+                ))}
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* Dashboard Placeholder Note */}
@@ -233,6 +269,38 @@ export function LaunchStepContent({
         marginTop: "clamp(24px, 5.5vh, 64px)",
       }}
     >
+      {/* TEAMMATE WELCOME BANNER (AC-8) */}
+      {memberRole !== "owner" && (
+        <motion.div
+          variants={itemVariants(0.02)}
+          initial="hidden"
+          animate="visible"
+          className="w-full max-w-full md:max-w-[440px] bg-[#F0FDF4] border border-[#BBF7D0] rounded-[8px] p-[14px] flex items-center gap-[12px] mb-[18px]"
+        >
+          <div className="w-[32px] h-[32px] rounded-full bg-[#16A34A] flex items-center justify-center flex-shrink-0 text-white">
+            <svg
+              className="w-[16px] h-[16px]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="font-['Geist',sans-serif] text-[13px] font-semibold text-[#166534]">
+              Welcome to the team!
+            </span>
+            <span className="font-['Geist',sans-serif] text-[12px] text-[#15803D]">
+              You’ve joined {summaryData?.companyName || "the workspace"} as {memberRole === "admin" ? "an Admin" : memberRole === "editor" ? "an Editor" : "a Viewer"}.
+            </span>
+          </div>
+        </motion.div>
+      )}
+
       {/* HEADING BLOCK: Aligned with Steps 3, 4, 5 */}
       <motion.div
         variants={itemVariants(0.04)}
@@ -241,10 +309,12 @@ export function LaunchStepContent({
         className="w-full max-w-full md:max-w-[440px] flex flex-col gap-[6px] flex-shrink-0 min-w-0 text-left"
       >
         <h1 className="font-['Geist',sans-serif] text-[24px] font-semibold leading-[30px] tracking-[-0.0015em] text-[#282828] m-0">
-          You’re all set!
+          {memberRole !== "owner" ? "Welcome to your workspace!" : "You’re all set!"}
         </h1>
         <p className="font-['Geist',sans-serif] text-[14px] font-medium leading-[20px] tracking-[-0.0015em] text-[#757575] m-0 max-w-[415px]">
-          Your Streamline workspace is ready. Your first workflow is queued up and ready to configure.
+          {memberRole !== "owner"
+            ? "Your workspace is ready. You have access to collaborate with your team."
+            : "Your Streamline workspace is ready. Your first workflow is queued up and ready to configure."}
         </p>
       </motion.div>
 
@@ -319,7 +389,7 @@ export function LaunchStepContent({
             </span>
           ) : (
             <span className="font-['Geist',sans-serif] text-[14px] font-medium leading-[16px] tracking-[-0.0015em] text-white">
-              Launch Streamline
+              {memberRole !== "owner" ? "Enter Workspace" : "Launch Streamline"}
             </span>
           )}
         </button>

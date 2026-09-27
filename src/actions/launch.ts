@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import {
   type LaunchSummaryData,
+  type MemberSummaryItem,
   getCompanyInitials,
   formatUserRole,
   formatAutomatingText,
@@ -13,7 +14,7 @@ import {
   formatInvitedTeammatesText,
 } from "@/lib/launch/schemas"
 
-export type { LaunchSummaryData }
+export type { LaunchSummaryData, MemberSummaryItem }
 
 export interface GetLaunchSummaryResult {
   success: boolean
@@ -86,7 +87,7 @@ export async function getLaunchSummaryAction(): Promise<GetLaunchSummaryResult> 
 
     const { workspaceId, userId, reqHeaders } = authResult
 
-    const [org, member, pendingInvitationsCount] = await Promise.all([
+    const [org, member, pendingInvitationsCount, totalMembersCount, orgMembers] = await Promise.all([
       db.organization.findUnique({
         where: { id: workspaceId },
         select: {
@@ -105,6 +106,24 @@ export async function getLaunchSummaryAction(): Promise<GetLaunchSummaryResult> 
       db.invitation.count({
         where: { organizationId: workspaceId, status: "pending" },
       }),
+      db.member.count({
+        where: { organizationId: workspaceId },
+      }),
+      db.member.findMany({
+        where: { organizationId: workspaceId },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+        take: 50,
+      }),
     ])
 
     if (!org) {
@@ -122,8 +141,23 @@ export async function getLaunchSummaryAction(): Promise<GetLaunchSummaryResult> 
     const integrationsText = formatIntegrationsText(org.selectedTools)
     const invitedTeammatesText = formatInvitedTeammatesText(pendingInvitationsCount)
 
+    const membersList: MemberSummaryItem[] = orgMembers.map((m) => ({
+      id: m.id,
+      name: m.user.name || m.user.email,
+      email: m.user.email,
+      role: m.role,
+      jobTitle: m.jobTitle,
+    }))
+
+    // Shareable invite link is restricted to owner and admin roles only
+    const isOwnerOrAdmin = member?.role === "owner" || member?.role === "admin"
     let shareableInviteLink: string | null = null
-    if (org.inviteCode && typeof org.inviteCode === "string" && org.inviteCode.trim().length > 0) {
+    if (
+      isOwnerOrAdmin &&
+      org.inviteCode &&
+      typeof org.inviteCode === "string" &&
+      org.inviteCode.trim().length > 0
+    ) {
       const host =
         reqHeaders.get("x-forwarded-host") ||
         reqHeaders.get("host") ||
@@ -131,7 +165,7 @@ export async function getLaunchSummaryAction(): Promise<GetLaunchSummaryResult> 
       const proto =
         reqHeaders.get("x-forwarded-proto") ||
         (host.includes("localhost") ? "http" : "https")
-      shareableInviteLink = `${proto}://${host}/invite/${org.inviteCode.trim()}`
+      shareableInviteLink = `${proto}://${host}/join/${org.inviteCode.trim()}`
     }
 
     return {
@@ -140,12 +174,15 @@ export async function getLaunchSummaryAction(): Promise<GetLaunchSummaryResult> 
         companyName,
         companyInitials,
         userRole,
+        memberRole: member?.role || "owner",
         automatingText,
         integrationsText,
         workflowText,
         invitedCount: pendingInvitationsCount,
         invitedTeammatesText,
-        inviteCode: org.inviteCode || null,
+        membersCount: totalMembersCount,
+        members: membersList,
+        inviteCode: isOwnerOrAdmin ? (org.inviteCode || null) : null,
         shareableInviteLink,
         onboardingStep: org.onboardingStep,
       },

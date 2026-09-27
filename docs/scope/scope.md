@@ -23,7 +23,9 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 6  | Selected tools persistence                | Slice 2    | done        |
 | 7  | Team invitations persistence              | Slice 3    | done        |
 | 8  | Setup summary and onboarding completion   | Slice 3    | done        |
-| 9  | Onboarding resume and route protection    | Slice 4    | in-progress |
+| 9  | Onboarding resume and route protection    | Slice 4    | done        |
+| 10 | Invite acceptance and teammate join flow  | Slice 5    | done        |
+| 11 | Transactional invite emails               | Slice 6    | planned     |
 
 ## Brownfield enrollment
 
@@ -179,7 +181,7 @@ Retrieve real workspace and owner records from the database on step six, populat
 
 ## Slice 4: Onboarding Resume and Routing
 
-### 9. Onboarding resume and route protection · in-progress · GA
+### 9. Onboarding resume and route protection · done · GA
 
 Session verification and routing rules that automatically redirect an owner to their latest incomplete onboarding step, and prevent completed owners from repeating onboarding.
 **Done when:** logging in with an incomplete onboarding state routes directly to the latest uncompleted step with saved data preloaded, and completed owners cannot reenter onboarding.
@@ -200,12 +202,33 @@ Session verification and routing rules that automatically redirect an owner to t
 
 ## Slice 5: Invite Acceptance
 
-### 10. Invite acceptance and teammate join flow · needs a decision
+### 10. Invite acceptance and teammate join flow · done
 
 Public, unauthenticated routes allowing an invited teammate to join an existing workspace via a named email invite token or the organization's shareable invite code, without going through owner onboarding. Incorporates the accept invite flow and invited member onboarding bypass previously deferred.
 **Done when:** a person visiting a valid, unexpired invite link can create an account, is attached to the existing organization as a Member with the invitation's role, the invitation is marked accepted, and they land somewhere sensible without being routed through the 6-step owner onboarding flow.
 
-- [ ] Design it (spec): `/architect invite acceptance & teammate join flow`
+- [X] Design it (spec): `/architect invite acceptance & teammate join flow`
+- [X] Build it: `/develop invite acceptance & teammate join flow`
+  - [X] Implement non owner onboarding bypass in getOnboardingResumeState (AC-8)
+  - [X] Update shareable invite link generation to emit /join/${inviteCode} (AC-6)
+  - [X] Implement token and code validation schemas and Server Actions with existing user checks (AC-1, AC-2, AC-6, AC-7, AC-9)
+  - [X] Build public token invite route /invite/[token] with registration and one click accept (AC-1, AC-2, AC-3, AC-4, AC-5, AC-9)
+  - [X] Build public organization join route /join/[code] with registration and viewer role join (AC-6, AC-7, AC-9)
+  - [X] Adapt launch screen with teammate welcome banner and test suite (AC-1 through AC-9)
+- [X] Verify it: `/check verify invite acceptance & teammate join flow`
+- [X] Test it: `/test invite acceptance & teammate join flow`
+- [X] Review it: `/check review invite acceptance & teammate join flow`
+  verify [verify.md](../specs/0010-invite-acceptance-and-teammate-join-flow/verify.md) · Spec [0010](../specs/0010-invite-acceptance-and-teammate-join-flow/index.md) · code in `src/app/invite/`, `src/app/join/`, `src/actions/team-invitation.ts`
+
+
+## Slice 6: Transactional Emails
+
+### 11. Transactional invite emails · needs a decision
+
+Send real emails to invited teammates when an invitation is created, using a transactional email provider, replacing the current manual copy paste link sharing. Builds on top of Feature 7 (invitation creation and token generation) and Feature 10 (accept side routes /invite/:token and /join/:code), which are its dependencies.
+**Done when:** creating a team invitation via Feature 7's createTeamInvitationsAction triggers an email to the invited address containing their working invite link, using a provider TBD (leaning Resend).
+
+- [ ] Design it (spec): `/architect transactional invite emails`
 
 ## Deferred
 
@@ -215,7 +238,6 @@ Out of scope for the current build pass, kept so the plan stays honest.
 - **Workflow execution engine**: creating, configuring, and executing AI automation workflows · needs a decision
 - **Subscription billing and plans**: paid tiers, checkout, and usage quotas · needs a decision · GA
 - **Social authentication**: Google and GitHub login integrations · needs a decision
-- **Transactional emails**: sending actual email invites to invited teammates · needs a decision
 - **Real OAuth integration connections**: connecting live third party accounts and API token management · needs a decision
 
 ## Legend

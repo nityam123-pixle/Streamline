@@ -1,16 +1,28 @@
+export interface MemberSummaryItem {
+  id: string
+  name: string
+  email: string
+  role: string
+  jobTitle?: string | null
+}
+
 export interface LaunchSummaryData {
   companyName: string
   companyInitials: string
   userRole: string
+  memberRole?: string
   automatingText: string
   integrationsText: string
   workflowText: string
   invitedCount: number
   invitedTeammatesText: string
+  membersCount?: number
+  members?: MemberSummaryItem[]
   inviteCode: string | null
   shareableInviteLink: string | null
   onboardingStep: string
 }
+
 
 export const AUTOMATION_AREA_LABELS: Record<string, { title: string; workflow: string }> = {
   sales: { title: "Sales Automation", workflow: "Lead Generation" },

@@ -76,3 +76,32 @@ export function validateAndNormalizeInvites(invites: { email: string; role?: str
 
   return { validInvites }
 }
+
+export const acceptTokenInvitationSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  name: z.string().trim().min(1, "Name is required").max(100).optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").optional(),
+})
+
+export type AcceptTokenInvitationInput = z.infer<typeof acceptTokenInvitationSchema>
+
+export const joinOrganizationByCodeSchema = z.object({
+  inviteCode: z.string().trim().length(8, "Invite code must be 8 characters"),
+  email: z.string().trim().toLowerCase().email("Please enter a valid email address").optional(),
+  name: z.string().trim().min(1, "Name is required").max(100).optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").optional(),
+})
+
+export type JoinOrganizationByCodeInput = z.infer<typeof joinOrganizationByCodeSchema>
+
+export interface AcceptInvitationResult {
+  success: boolean
+  error?: string
+  fieldErrors?: Record<string, string>
+  redirectUrl?: string
+  requiresLogin?: boolean
+  emailMismatch?: boolean
+  organizationName?: string
+  role?: string
+}
+

@@ -201,6 +201,17 @@ export async function getOnboardingResumeState(
     return null;
   }
 
+  // Non-owner members (admin, editor, viewer) bypass the 6-step owner onboarding flow (AC-8)
+  if (member.role !== "owner") {
+    return {
+      step: "launch",
+      targetPath: "/launch",
+      isCompleted: true,
+      organizationId: member.organizationId,
+      role: member.role,
+    };
+  }
+
   const rawStep = member.organization.onboardingStep;
   const isCompleted = rawStep === "completed";
   const step = isCompleted

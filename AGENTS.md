@@ -25,6 +25,9 @@ npm run build
 
 # Lint
 npm run lint
+
+# Run tests
+npm test
 ```
 
 ## Specs

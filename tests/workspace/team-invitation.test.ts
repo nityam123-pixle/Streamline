@@ -206,7 +206,7 @@ describe("Team Invitations Persistence (Feature 7)", () => {
       const result = await getTeamInvitationsAction()
       expect(result.success).toBe(true)
       expect(result.inviteCode).toBeDefined()
-      expect(result.inviteLink).toContain("/invite/")
+      expect(result.inviteLink).toContain("/join/")
       expect(result.inviteLink).toContain(result.inviteCode)
       expect(result.invitations).toEqual([])
 
@@ -228,7 +228,7 @@ describe("Team Invitations Persistence (Feature 7)", () => {
 
       const result = await getTeamInvitationsAction()
       expect(result.success).toBe(true)
-      expect(result.inviteLink).toContain("https://app.streamline.io/invite/")
+      expect(result.inviteLink).toContain("https://app.streamline.io/join/")
     })
   })
 
