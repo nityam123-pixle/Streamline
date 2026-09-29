@@ -17,6 +17,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
+  const resetSuccess = searchParams.get("reset") === "success";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -77,6 +78,15 @@ export function LoginForm() {
         <FormDivider />
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {resetSuccess && (
+            <div
+              role="status"
+              className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 font-medium"
+            >
+              Your password has been reset successfully. Please sign in with your new password.
+            </div>
+          )}
+
           {errorMessage && (
             <div
               role="alert"
@@ -103,6 +113,14 @@ export function LoginForm() {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            rightElement={
+              <Link
+                href="/forgot-password"
+                className="text-xs text-[#64748B] hover:text-foreground transition-colors"
+              >
+                Forgot password?
+              </Link>
+            }
           />
 
           <SubmitButton

@@ -9,7 +9,7 @@ const ONBOARDING_ROUTES = [
   "/launch",
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check for Better Auth session token cookie (HTTP and HTTPS variants)
@@ -32,12 +32,20 @@ export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+  response.headers.set("Referrer-Policy", "no-referrer");
+
+  return response;
 }
+
+// Keep middleware alias for backward compatibility with testing imports
+export const middleware = proxy;
+
+export default proxy;
 
 export const config = {
   matcher: [

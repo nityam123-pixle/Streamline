@@ -1,5 +1,5 @@
 import { auth } from "../src/lib/auth/index"
-import { middleware } from "../src/middleware"
+import { proxy as middleware } from "../src/proxy"
 import { NextRequest } from "next/server"
 
 async function runAuthVerification() {

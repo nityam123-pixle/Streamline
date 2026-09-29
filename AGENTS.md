@@ -46,11 +46,15 @@ Stored in `docs/specs/`. Format: `docs/specs/NNNN-title.md`.
 - Validate secrets in one env module, kept gitignored in `.env.local`.
 - Wire data into existing Figma UI without changing layouts or animations.
 - Run `npm run build` before considering any Server Action change verified (Vitest cannot catch Next.js "use server" export constraints).
+- Route gating and path forwarding uses Next.js 16 proxy convention in `src/proxy.ts` rather than deprecated `src/middleware.ts`.
 
 ## Agent skills
 
 - [better-auth-best-practices](.agents/skills/better-auth-best-practices/): `better-auth/skills`, Better Auth authentication architecture and security
 - [vercel-react-best-practices](.agents/skills/vercel-react-best-practices/): `vercel-labs/agent-skills`, React and Next.js performance and patterns
+- [resend](.agents/skills/resend/): `resend/resend-skills`, Resend transactional email API integration and conventions
+- [react-email](.agents/skills/react-email/): `resend/resend-skills`, React Email template creation and styling
+- MCP servers: Resend (recommended)
 
 ## Context files
 

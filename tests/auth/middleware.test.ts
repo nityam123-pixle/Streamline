@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { NextRequest } from "next/server"
-import { middleware } from "@/middleware"
+import { proxy as middleware } from "@/proxy"
 
 describe("Middleware session gating and routing (AC-2, AC-8)", () => {
   const protectedRoutes = [

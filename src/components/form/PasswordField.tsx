@@ -7,16 +7,20 @@ import { AnimatedEyeIcon } from "@/components/icons";
 interface PasswordFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   id: string;
+  rightElement?: React.ReactNode;
 }
 
-export function PasswordField({ label, id, ...props }: PasswordFieldProps) {
+export function PasswordField({ label, id, rightElement, ...props }: PasswordFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div>
-      <label htmlFor={id} className="block text-xs font-semibold text-[#282828] mb-1.5">
-        {label}
-      </label>
+      <div className="flex items-center justify-between mb-1.5">
+        <label htmlFor={id} className="block text-xs font-semibold text-[#282828]">
+          {label}
+        </label>
+        {rightElement}
+      </div>
       <div className="relative flex items-center">
         <Input
           id={id}

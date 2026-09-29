@@ -22,6 +22,7 @@ model User {
   lastName      String?
   email         String       @unique
   emailVerified Boolean      @default(false)
+  emailVerifiedAt DateTime?
   image         String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -72,14 +73,16 @@ model Account {
 }
 
 model Verification {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@unique([identifier, value])
+  @@index([value])
   @@map("verification")
 }
 
@@ -128,6 +131,7 @@ model Invitation {
   token          String       @unique @default(cuid())
   expiresAt      DateTime
   inviterId      String
+  emailSentAt    DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

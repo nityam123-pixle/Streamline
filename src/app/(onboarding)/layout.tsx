@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { getOnboardingResumeState, isStepAccessAllowed } from "@/lib/onboarding/routing";
 import { OnboardingProvider } from "@/context/OnboardingTransitionContext";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
+import { EmailVerificationBanner } from "@/components/onboarding/EmailVerificationBanner";
 
 export default async function OnboardingLayout({
   children,
@@ -37,6 +38,9 @@ export default async function OnboardingLayout({
 
   return (
     <OnboardingProvider initialPath={pathname}>
+      {!session.user.emailVerified && (
+        <EmailVerificationBanner email={session.user.email} />
+      )}
       <OnboardingShell />
       <div className="sr-only" aria-hidden="true">
         {children}

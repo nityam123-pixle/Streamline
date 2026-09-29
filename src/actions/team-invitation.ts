@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Role } from "@prisma/client"
 import { resolveHighWatermarkStep } from "@/lib/onboarding/routing"
+import { batchSendTeamInviteEmails } from "@/lib/email/invite"
 import {
   teamInvitationsSchema,
   validateAndNormalizeInvites,
@@ -45,6 +46,7 @@ export interface CreateTeamInvitationsResult {
   fieldErrors?: Record<string, string>
   count?: number
   onboardingStep?: string
+  emailWarnings?: string[]
 }
 
 async function generateUniqueInviteCode(
@@ -64,10 +66,12 @@ async function generateUniqueInviteCode(
   return randomUUID()
 }
 
-async function getAuthorizedSessionAndWorkspace(): Promise<
+async function getAuthorizedSessionAndWorkspace(customHeaders?: Headers): Promise<
   | {
       authorized: true
       userId: string
+      userName: string
+      userEmail: string
       workspaceId: string
       reqHeaders: Headers
     }
@@ -77,10 +81,14 @@ async function getAuthorizedSessionAndWorkspace(): Promise<
     }
 > {
   let reqHeaders: Headers
-  try {
-    reqHeaders = await headers()
-  } catch {
-    reqHeaders = new Headers()
+  if (customHeaders) {
+    reqHeaders = customHeaders
+  } else {
+    try {
+      reqHeaders = await headers()
+    } catch {
+      reqHeaders = new Headers()
+    }
   }
 
   const sessionData = await auth.api.getSession({
@@ -131,6 +139,8 @@ async function getAuthorizedSessionAndWorkspace(): Promise<
   return {
     authorized: true,
     userId,
+    userName: sessionData.user.name || "A team member",
+    userEmail: sessionData.user.email || "dispatch@streamline.app",
     workspaceId,
     reqHeaders,
   }
@@ -216,7 +226,8 @@ export async function getTeamInvitationsAction(): Promise<GetTeamInvitationsResu
 }
 
 export async function createTeamInvitationsAction(
-  rawInput: unknown
+  rawInput: unknown,
+  customHeaders?: Headers
 ): Promise<CreateTeamInvitationsResult> {
   // 1. Zod input validation
   const validation = teamInvitationsSchema.safeParse(rawInput)
@@ -246,7 +257,7 @@ export async function createTeamInvitationsAction(
 
   try {
     // 2. Authorize via Session
-    const authResult = await getAuthorizedSessionAndWorkspace()
+    const authResult = await getAuthorizedSessionAndWorkspace(customHeaders)
     if (!authResult.authorized) {
       return {
         success: false,
@@ -315,11 +326,23 @@ export async function createTeamInvitationsAction(
 
     // 5. In an atomic transaction, ensure inviteCode, upsert invitations with SHA-256 token hashes, and advance step
     let nextStep = "launch"
+    let workspaceName = "Workspace"
+    const createdInviteTokens: Array<{
+      invitationId: string
+      email: string
+      role: string
+      rawToken: string
+    }> = []
+
     await db.$transaction(async (tx) => {
       const org = await tx.organization.findUnique({
         where: { id: workspaceId },
-        select: { inviteCode: true, onboardingStep: true },
+        select: { name: true, inviteCode: true, onboardingStep: true },
       })
+
+      if (org?.name) {
+        workspaceName = org.name
+      }
 
       nextStep = resolveHighWatermarkStep(org?.onboardingStep, "launch")
 
@@ -341,7 +364,7 @@ export async function createTeamInvitationsAction(
         const tokenHash = createHash("sha256").update(rawToken).digest("hex")
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
-        await tx.invitation.upsert({
+        const invRecord = await tx.invitation.upsert({
           where: {
             organizationId_email: {
               organizationId: workspaceId,
@@ -364,14 +387,60 @@ export async function createTeamInvitationsAction(
             expiresAt,
             inviterId: userId,
           },
+          select: { id: true },
+        })
+
+        createdInviteTokens.push({
+          invitationId: invRecord.id,
+          email: invite.email,
+          role: invite.role,
+          rawToken,
         })
       }
     })
+
+    // 6. Dispatch transactional invite emails with error isolation (AC-1, AC-5, AC-6)
+    const host =
+      authResult.reqHeaders.get("x-forwarded-host") ||
+      authResult.reqHeaders.get("host") ||
+      "localhost:3000"
+    const proto =
+      authResult.reqHeaders.get("x-forwarded-proto") ||
+      (host.includes("localhost") ? "http" : "https")
+    const baseUrl = `${proto}://${host}`
+
+    let emailWarnings: string[] | undefined
+    if (createdInviteTokens.length > 0) {
+      // Check if inviter's email is verified to protect platform domain reputation (AC-7)
+      const inviterUser = await db.user.findUnique({
+        where: { id: userId },
+        select: { emailVerified: true },
+      })
+
+      if (!inviterUser?.emailVerified) {
+        emailWarnings = [
+          "Email dispatch is held until your email address is verified. You can still share the invite link directly with teammates.",
+        ]
+      } else {
+        const dispatchResult = await batchSendTeamInviteEmails({
+          invites: createdInviteTokens,
+          inviterName: authResult.userName,
+          inviterEmail: authResult.userEmail,
+          workspaceName,
+          baseUrl,
+        })
+
+        if (dispatchResult.warnings.length > 0) {
+          emailWarnings = dispatchResult.warnings
+        }
+      }
+    }
 
     return {
       success: true,
       count: validInvites.length,
       onboardingStep: nextStep,
+      ...(emailWarnings && emailWarnings.length > 0 ? { emailWarnings } : {}),
     }
   } catch (err: unknown) {
     console.error("createTeamInvitationsAction error:", err)

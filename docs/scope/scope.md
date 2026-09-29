@@ -17,15 +17,15 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 2  | Auth, session and login page              | Foundation | done        |
 | 3  | Owner signup and workspace creation       | Slice 1    | done        |
 | 4  | Workspace profile persistence             | Slice 1    | done        |
-| 2b | Email verification                        | Slice 1b   | planned     |
-| 2c | Password reset                            | Slice 1b   | planned     |
+| 2b | Email verification                        | Slice 1b   | in-progress |
+| 2c | Password reset                            | Slice 1b   | done        |
 | 5  | Automation preferences persistence        | Slice 2    | done        |
 | 6  | Selected tools persistence                | Slice 2    | done        |
 | 7  | Team invitations persistence              | Slice 3    | done        |
 | 8  | Setup summary and onboarding completion   | Slice 3    | done        |
 | 9  | Onboarding resume and route protection    | Slice 4    | done        |
 | 10 | Invite acceptance and teammate join flow  | Slice 5    | done        |
-| 11 | Transactional invite emails               | Slice 6    | planned     |
+| 11 | Transactional invite emails               | Slice 6    | done        |
 
 ## Brownfield enrollment
 
@@ -102,19 +102,41 @@ Persist user role and workspace metadata from step two (company name, team size)
 
 ## Slice 1b: Auth verification and recovery
 
-### 2b. Email verification · needs a decision · GA
+### 2b. Email verification · in-progress · GA
 
 Verify owner email addresses through secure one time tokens or links without blocking initial onboarding progression.
 **Done when:** an owner receives an email verification prompt and token, and confirming their address updates their verification status in the database.
 
-- [ ] Design it (spec): `/architect email verification`
+- [X] Design it (spec): `/architect email verification`
+- [X] Build it: `/develop email verification`
+  - [X] Add emailVerifiedAt and consumedAt schema fields and apply migration (AC-3)
+  - [X] Create branded VerifyEmail React Email template and Better Auth email hooks (AC-1, AC-2, AC-6)
+  - [X] Implement resendVerificationEmailAction with rate limiting and cooldown (AC-4)
+  - [X] Build public /verify-email status route with cross device verification (AC-3, AC-5)
+  - [X] Build non blocking EmailVerificationBanner for onboarding layout (AC-4)
+- [X] Verify it: `/check verify email verification`
+- [X] Test it: `/test email verification`
+- [X] Review it (fresh model): `/check review email verification`
+- [X] Document it: `/document email verification`
+  verify [verify.md](../specs/0012-email-verification/verify.md) · Spec [0012](../specs/0012-email-verification/index.md) · code in `src/actions/auth.ts`, `src/actions/team-invitation.ts`, `src/lib/auth/`, `src/lib/email/`, `src/components/emails/`, `src/components/onboarding/`, `src/app/verify-email/`
 
-### 2c. Password reset · needs a decision · GA
+### 2c. Password reset · done · GA
 
 Secure credential recovery flow allowing owners to request a password reset link and establish new credentials.
 **Done when:** an owner can request a reset email, validate a time limited reset token, and submit a new password that updates the database and invalidates old sessions.
 
-- [ ] Design it (spec): `/architect password reset`
+- [X] Design it (spec): `/architect password reset`
+- [X] Build it: `/develop password reset`
+  - [X] Create branded ResetPasswordEmail React Email template and Better Auth email hooks (AC-1, AC-3, AC-6)
+  - [X] Implement requestPasswordResetAction with generic response and 60 second cooldown (AC-1, AC-2)
+  - [X] Build public /forgot-password page matching Streamline split screen branding (AC-1, AC-2)
+  - [X] Implement resetPasswordAction with password complexity rules, session revocation, and consumedAt marking (AC-4, AC-5)
+  - [X] Build public /reset-password page with token validation and login feedback banner (AC-4, AC-5)
+- [X] Verify it: `/check verify password reset`
+- [X] Test it: `/test password reset`
+- [X] Review it (fresh model): `/check review password reset`
+- [X] Document it: `/document password reset`
+  verify [verify.md](../specs/0013-password-reset/verify.md) · Spec [0013](../specs/0013-password-reset/index.md) · code in `src/actions/auth.ts`, `src/lib/auth/`, `src/components/emails/`, `src/app/forgot-password/`, `src/app/reset-password/`
 
 ## Slice 2: Automation and Selected Tools
 
@@ -223,12 +245,20 @@ Public, unauthenticated routes allowing an invited teammate to join an existing 
 
 ## Slice 6: Transactional Emails
 
-### 11. Transactional invite emails · needs a decision
+### 11. Transactional invite emails · done
 
 Send real emails to invited teammates when an invitation is created, using a transactional email provider, replacing the current manual copy paste link sharing. Builds on top of Feature 7 (invitation creation and token generation) and Feature 10 (accept side routes /invite/:token and /join/:code), which are its dependencies.
-**Done when:** creating a team invitation via Feature 7's createTeamInvitationsAction triggers an email to the invited address containing their working invite link, using a provider TBD (leaning Resend).
+**Done when:** creating a team invitation via Feature 7's createTeamInvitationsAction triggers an email to the invited address containing their working invite link, using Resend and React Email.
 
-- [ ] Design it (spec): `/architect transactional invite emails`
+- [X] Design it (spec): `/architect transactional invite emails`
+- [X] Build it: `/develop transactional invite emails`
+  - [X] Add emailSentAt to Invitation schema and apply database migration (AC-3)
+  - [X] Install Resend and React Email with mock logger environment fallback (AC-4)
+  - [X] Create branded TeamInviteEmail component using @react-email/components (AC-1, AC-2)
+  - [X] Implement email sending utility with error isolation and wire into createTeamInvitationsAction (AC-1, AC-2, AC-3, AC-5, AC-6)
+- [X] Verify it: `/check verify transactional invite emails`
+- [X] Test it: 7 unit and integration tests passing in transactional-email.test.ts (separate /test run skipped)
+  verify [verify.md](../specs/0011-transactional-invite-emails/verify.md) · Spec [0011](../specs/0011-transactional-invite-emails/index.md) · code in `src/actions/team-invitation.ts`, `src/components/emails/`, `src/lib/email/`
 
 ## Deferred
 
